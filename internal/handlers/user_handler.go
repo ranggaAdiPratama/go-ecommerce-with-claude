@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 type UserHandler struct {
@@ -69,9 +70,115 @@ func (h *UserHandler) Index(c *gin.Context) {
 	c.JSON(http.StatusOK, responses.Response{
 		MetaData: responses.MetaDataResponse{
 			Code:    http.StatusOK,
-			Message: "User Retrieved Successfully",
+			Message: "Users Retrieved Successfully",
 		},
 		Data: users,
+	})
+}
+
+func (h *UserHandler) Destroy(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := uuid.Parse(idParam)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusBadRequest,
+				Message: "invalid ID Format",
+			},
+		})
+	}
+
+	err = h.service.Destroy(c, id)
+
+	if err != nil {
+		if errors.Is(err, errors.New("user not found")) {
+			c.JSON(http.StatusNotFound, responses.Response{
+				MetaData: responses.MetaDataResponse{
+					Code:    http.StatusNotFound,
+					Message: "User not found",
+				},
+			})
+
+			return
+		}
+
+		fmt.Println(err)
+
+		c.JSON(http.StatusNotFound, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusNotFound,
+				Message: "User not found",
+			},
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.Response{
+		MetaData: responses.MetaDataResponse{
+			Code:    http.StatusOK,
+			Message: "User Deleted Successfully",
+		},
+	})
+}
+
+func (h *UserHandler) Show(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := uuid.Parse(idParam)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusBadRequest,
+				Message: "invalid ID Format",
+			},
+		})
+	}
+
+	user, err := h.service.Show(c.Request.Context(), id)
+
+	if err != nil {
+		if errors.Is(err, errors.New("user not found")) {
+			c.JSON(http.StatusNotFound, responses.Response{
+				MetaData: responses.MetaDataResponse{
+					Code:    http.StatusNotFound,
+					Message: "User not found",
+				},
+			})
+
+			return
+		} else if errors.Is(err, errors.New("invalid User Id")) {
+			c.JSON(http.StatusBadRequest, responses.Response{
+				MetaData: responses.MetaDataResponse{
+					Code:    http.StatusBadRequest,
+					Message: "invalid User Id",
+				},
+			})
+
+			return
+		}
+
+		fmt.Println(err)
+
+		c.JSON(http.StatusInternalServerError, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusInternalServerError,
+				Message: "Failed to fetch users",
+			},
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.Response{
+		MetaData: responses.MetaDataResponse{
+			Code:    http.StatusOK,
+			Message: "User Retrieved Successfully",
+		},
+		Data: user,
 	})
 }
 
@@ -135,6 +242,147 @@ func (h *UserHandler) Store(c *gin.Context) {
 	user, err := h.service.Store(c, *body)
 
 	if err != nil {
+		if errors.Is(err, errors.New("e-mail already taken")) {
+			c.JSON(http.StatusBadGateway, responses.Response{
+				MetaData: responses.MetaDataResponse{
+					Code:    http.StatusBadGateway,
+					Message: "e-mail already taken",
+				},
+			})
+
+			return
+		} else if errors.Is(err, errors.New("username already taken")) {
+			c.JSON(http.StatusBadGateway, responses.Response{
+				MetaData: responses.MetaDataResponse{
+					Code:    http.StatusBadGateway,
+					Message: "username already taken",
+				},
+			})
+
+			return
+		}
+
+		fmt.Println(err)
+
+		c.JSON(http.StatusInternalServerError, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusInternalServerError,
+				Message: "Failed in storing user",
+			},
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusCreated, responses.Response{
+		MetaData: responses.MetaDataResponse{
+			Code:    http.StatusCreated,
+			Message: "User Created Successfully",
+		},
+		Data: user,
+	})
+}
+
+func (h *UserHandler) Update(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := uuid.Parse(idParam)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusBadRequest,
+				Message: "invalid ID Format",
+			},
+		})
+	}
+
+	var request requests.UpdateUserRequest
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		var ve validator.ValidationErrors
+
+		if errors.As(err, &ve) {
+			out := make([]string, len(ve))
+
+			for i, fe := range ve {
+				out[i] = utils.HumanizeError(fe)
+			}
+
+			c.JSON(http.StatusBadRequest, responses.Response{
+				MetaData: responses.MetaDataResponse{
+					Code:    http.StatusBadRequest,
+					Message: "Invalid input. Please check your data.",
+				},
+				Data: out,
+			})
+
+			return
+		}
+
+		c.JSON(http.StatusBadRequest, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusBadRequest,
+				Message: "Invalid input. Please check your data.",
+			},
+		})
+
+		return
+	}
+
+	body := &database.UpdateUserParams{
+		Name:     request.Name,
+		Email:    request.Email,
+		Username: request.Username,
+		ID:       id,
+	}
+
+	if request.Password != "" {
+		hashed, err := utils.HashPassword(request.Password)
+
+		if err != nil {
+			fmt.Println(err)
+
+			c.JSON(http.StatusInternalServerError, responses.Response{
+				MetaData: responses.MetaDataResponse{
+					Code:    http.StatusInternalServerError,
+					Message: "Failed in hashing password",
+				},
+			})
+
+			return
+		}
+
+		body.Password = hashed
+	}
+
+	if request.Role != "" {
+		body.Role = request.Role
+	}
+
+	user, err := h.service.Update(c, *body)
+
+	if err != nil {
+		if errors.Is(err, errors.New("e-mail already taken")) {
+			c.JSON(http.StatusBadGateway, responses.Response{
+				MetaData: responses.MetaDataResponse{
+					Code:    http.StatusBadGateway,
+					Message: "e-mail already taken",
+				},
+			})
+
+			return
+		} else if errors.Is(err, errors.New("username already taken")) {
+			c.JSON(http.StatusBadGateway, responses.Response{
+				MetaData: responses.MetaDataResponse{
+					Code:    http.StatusBadGateway,
+					Message: "username already taken",
+				},
+			})
+
+			return
+		}
+
 		fmt.Println(err)
 
 		c.JSON(http.StatusInternalServerError, responses.Response{

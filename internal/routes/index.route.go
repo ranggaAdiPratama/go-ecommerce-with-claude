@@ -12,6 +12,7 @@ import (
 
 func Index(r *gin.Engine, s *database.Store) {
 	userService := service.NewUserService(s)
+
 	userHandler := handlers.NewUserHandler(userService)
 
 	r.GET("/", IndexRoute)
@@ -20,7 +21,10 @@ func Index(r *gin.Engine, s *database.Store) {
 	users := r.Group("/api/users")
 
 	users.GET("", userHandler.Index)
+	users.GET("/:id", userHandler.Show)
 	users.POST("", userHandler.Store)
+	users.PUT("/:id", userHandler.Update)
+	users.DELETE("/:id", userHandler.Destroy)
 }
 
 func IndexRoute(c *gin.Context) {

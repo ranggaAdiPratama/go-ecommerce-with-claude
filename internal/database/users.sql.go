@@ -8,13 +8,15 @@ package database
 import (
 	"context"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const deleteUser = `-- name: DeleteUser :exec
-DELETE FROM users WHERE id = $1
+UPDATE users SET deleted_at = NOW() WHERE id = $1
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
+func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteUser, id)
 	return err
 }
@@ -31,11 +33,12 @@ SELECT
 FROM users
 WHERE
     email = $1
+    AND deleted_at IS NULL
 LIMIT 1
 `
 
 type GetUserByEmailRow struct {
-	ID        int32     `json:"id"`
+	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
@@ -71,11 +74,12 @@ SELECT
 FROM users
 WHERE
     id = $1
+    AND deleted_at IS NULL
 LIMIT 1
 `
 
 type GetUserByIdRow struct {
-	ID        int32     `json:"id"`
+	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
@@ -84,7 +88,7 @@ type GetUserByIdRow struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func (q *Queries) GetUserById(ctx context.Context, id int32) (GetUserByIdRow, error) {
+func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error) {
 	row := q.db.QueryRowContext(ctx, getUserById, id)
 	var i GetUserByIdRow
 	err := row.Scan(
@@ -111,11 +115,12 @@ SELECT
 FROM users
 WHERE
     username = $1
+    AND deleted_at IS NULL
 LIMIT 1
 `
 
 type GetUserByUsernameRow struct {
-	ID        int32     `json:"id"`
+	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
@@ -176,7 +181,7 @@ type StoreUserParams struct {
 }
 
 type StoreUserRow struct {
-	ID        int32     `json:"id"`
+	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
@@ -226,24 +231,26 @@ WHERE
     name,
     username,
     email,
+    role,
     created_at,
     updated_at
 `
 
 type UpdateUserParams struct {
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
-	Password string `json:"password"`
-	ID       int32  `json:"id"`
+	Name     string    `json:"name"`
+	Username string    `json:"username"`
+	Email    string    `json:"email"`
+	Role     string    `json:"role"`
+	Password string    `json:"password"`
+	ID       uuid.UUID `json:"id"`
 }
 
 type UpdateUserRow struct {
-	ID        int32     `json:"id"`
+	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
+	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -263,6 +270,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateU
 		&i.Name,
 		&i.Username,
 		&i.Email,
+		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -280,7 +288,8 @@ SELECT
     updated_at
 FROM users
 WHERE
-    (
+    deleted_at IS NULL
+    AND (
         NULLIF($1::text, '') IS NULL
         OR role = $1::text
     )
@@ -308,7 +317,7 @@ type UserListParams struct {
 }
 
 type UserListRow struct {
-	ID        int32     `json:"id"`
+	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`

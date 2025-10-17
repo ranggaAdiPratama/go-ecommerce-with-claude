@@ -10,6 +10,7 @@ SELECT
 FROM users
 WHERE
     id = $1
+    AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: GetUserByUsername :one
@@ -24,6 +25,7 @@ SELECT
 FROM users
 WHERE
     username = $1
+    AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: GetUserByEmail :one
@@ -38,6 +40,7 @@ SELECT
 FROM users
 WHERE
     email = $1
+    AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: UserList :many
@@ -51,7 +54,8 @@ SELECT
     updated_at
 FROM users
 WHERE
-    (
+    deleted_at IS NULL
+    AND (
         NULLIF(@role::text, '') IS NULL
         OR role = @role::text
     )
@@ -117,8 +121,9 @@ WHERE
     name,
     username,
     email,
+    role,
     created_at,
     updated_at;
 
 -- name: DeleteUser :exec
-DELETE FROM users WHERE id = $1;
+UPDATE users SET deleted_at = NOW() WHERE id = $1;
