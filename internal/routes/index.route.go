@@ -13,12 +13,16 @@ import (
 func Index(r *gin.Engine, s *database.Store) {
 	userService := service.NewUserService(s)
 
+	authHandler := handlers.NewAuthHandler(userService)
 	userHandler := handlers.NewUserHandler(userService)
 
 	r.GET("/", IndexRoute)
 	r.GET("/health", HealthRoute)
 
 	users := r.Group("/api/users")
+	auth := r.Group("/api/auth")
+
+	auth.POST("/register", authHandler.Register)
 
 	users.GET("", userHandler.Index)
 	users.GET("/:id", userHandler.Show)
