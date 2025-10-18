@@ -15,13 +15,77 @@ import (
 )
 
 type AuthHandler struct {
-	user *service.UserService
+	service *service.AuthService
+	user    *service.UserService
 }
 
-func NewAuthHandler(user *service.UserService) *AuthHandler {
+func NewAuthHandler(service *service.AuthService, user *service.UserService) *AuthHandler {
 	return &AuthHandler{
-		user: user,
+		service: service,
+		user:    user,
 	}
+}
+
+func (h *AuthHandler) Login(c *gin.Context) {
+	var request requests.LoginRequest
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		var ve validator.ValidationErrors
+
+		if errors.As(err, &ve) {
+			out := make([]string, len(ve))
+
+			for i, fe := range ve {
+				out[i] = utils.HumanizeError(fe)
+			}
+
+			c.JSON(http.StatusBadRequest, responses.Response{
+				MetaData: responses.MetaDataResponse{
+					Code:    http.StatusBadRequest,
+					Message: "Invalid input. Please check your data.",
+				},
+				Data: out,
+			})
+
+			return
+		}
+
+		c.JSON(http.StatusBadRequest, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusBadRequest,
+				Message: "Invalid input. Please check your data.",
+			},
+		})
+
+		return
+	}
+
+	data, err := h.service.Login(c, request)
+
+	if err != nil {
+		statusCode := http.StatusInternalServerError
+
+		if err.Error() == "invalid credentials" || err.Error() == "account has been deactivated" {
+			statusCode = http.StatusUnauthorized
+		}
+
+		c.JSON(statusCode, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    statusCode,
+				Message: "Invalid input. Please check your data.",
+			},
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.Response{
+		MetaData: responses.MetaDataResponse{
+			Code:    http.StatusOK,
+			Message: "Login success",
+		},
+		Data: data,
+	})
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {

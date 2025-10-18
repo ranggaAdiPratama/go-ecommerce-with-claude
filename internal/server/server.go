@@ -2,17 +2,20 @@ package server
 
 import (
 	"database/sql"
+	"log"
 	"ranggaAdiPratama/go-with-claude/internal/config"
 	"ranggaAdiPratama/go-with-claude/internal/database"
 	"ranggaAdiPratama/go-with-claude/internal/routes"
+	"ranggaAdiPratama/go-with-claude/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	config *config.Config
-	router *gin.Engine
-	store  *database.Store
+	config      *config.Config
+	router      *gin.Engine
+	store       *database.Store
+	pasetoMaker *utils.PasetoMaker
 }
 
 func New(db *sql.DB, cfg *config.Config) *Server {
@@ -21,13 +24,20 @@ func New(db *sql.DB, cfg *config.Config) *Server {
 	store := database.NewStore(db)
 	router := gin.Default()
 
-	s := &Server{
-		config: cfg,
-		router: router,
-		store:  store,
+	pasetoMaker, err := utils.NewPasetoMaker(cfg.TokenSymmetricKey)
+
+	if err != nil {
+		log.Fatal("Cannot create PASETO maker:", err)
 	}
 
-	routes.Index(router, store)
+	s := &Server{
+		config:      cfg,
+		router:      router,
+		store:       store,
+		pasetoMaker: pasetoMaker,
+	}
+
+	routes.Index(router, store, pasetoMaker, cfg)
 
 	return s
 }

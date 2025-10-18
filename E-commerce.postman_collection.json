@@ -10,7 +10,7 @@
 			"name": "Auth",
 			"item": [
 				{
-					"name": "register",
+					"name": "Register",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -30,6 +30,53 @@
 							],
 							"path": [
 								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let responseData = pm.response.json();\r",
+									"\r",
+									"if(pm.response.code == 200) {\r",
+									"pm.environment.set(\"authToken\", responseData.data.token);\r",
+									"pm.environment.set(\"refreshToken\", responseData.data.refresh_token);\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"Username\":\"rangga\",\r\n    \"password\":\"12juli1996\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}auth/login",
+							"host": [
+								"{{url}}auth"
+							],
+							"path": [
+								"login"
 							]
 						}
 					},

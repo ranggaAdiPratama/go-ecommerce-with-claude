@@ -2,18 +2,21 @@ package routes
 
 import (
 	"net/http"
+	"ranggaAdiPratama/go-with-claude/internal/config"
 	"ranggaAdiPratama/go-with-claude/internal/database"
 	"ranggaAdiPratama/go-with-claude/internal/handlers"
 	"ranggaAdiPratama/go-with-claude/internal/responses"
 	"ranggaAdiPratama/go-with-claude/internal/service"
+	"ranggaAdiPratama/go-with-claude/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
-func Index(r *gin.Engine, s *database.Store) {
+func Index(r *gin.Engine, s *database.Store, p *utils.PasetoMaker, c *config.Config) {
+	authService := service.NewAuthService(s, p, c)
 	userService := service.NewUserService(s)
 
-	authHandler := handlers.NewAuthHandler(userService)
+	authHandler := handlers.NewAuthHandler(authService, userService)
 	userHandler := handlers.NewUserHandler(userService)
 
 	r.GET("/", IndexRoute)
@@ -22,6 +25,7 @@ func Index(r *gin.Engine, s *database.Store) {
 	users := r.Group("/api/users")
 	auth := r.Group("/api/auth")
 
+	auth.POST("/login", authHandler.Login)
 	auth.POST("/register", authHandler.Register)
 
 	users.GET("", userHandler.Index)

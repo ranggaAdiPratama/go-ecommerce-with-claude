@@ -1,18 +1,18 @@
 package utils
 
 import (
+	"os"
+	"time"
+
 	"github.com/go-playground/validator/v10"
-	"golang.org/x/crypto/bcrypt"
 )
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-
-	if err != nil {
-		return "", err
+func GetEnv(key, fallback string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
 	}
 
-	return string(bytes), nil
+	return fallback
 }
 
 func HumanizeError(fe validator.FieldError) string {
@@ -26,4 +26,14 @@ func HumanizeError(fe validator.FieldError) string {
 	default:
 		return fe.Field() + " is invalid"
 	}
+}
+
+func ParseDuration(s string) time.Duration {
+	d, err := time.ParseDuration(s)
+
+	if err != nil {
+		return 15 * time.Minute
+	}
+
+	return d
 }

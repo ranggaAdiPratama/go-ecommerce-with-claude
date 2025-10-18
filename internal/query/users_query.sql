@@ -1,12 +1,5 @@
 -- name: GetUserById :one
-SELECT
-    id,
-    name,
-    username,
-    email,
-    role,
-    created_at,
-    updated_at
+SELECT *
 FROM users
 WHERE
     id = $1
@@ -14,14 +7,7 @@ WHERE
 LIMIT 1;
 
 -- name: GetUserByUsername :one
-SELECT
-    id,
-    name,
-    username,
-    email,
-    role,
-    created_at,
-    updated_at
+SELECT *
 FROM users
 WHERE
     username = $1
@@ -29,14 +15,7 @@ WHERE
 LIMIT 1;
 
 -- name: GetUserByEmail :one
-SELECT
-    id,
-    name,
-    username,
-    email,
-    role,
-    created_at,
-    updated_at
+SELECT *
 FROM users
 WHERE
     email = $1
@@ -44,15 +23,7 @@ WHERE
 LIMIT 1;
 
 -- name: UserList :many
-SELECT
-    id,
-    name,
-    username,
-    email,
-    role,
-    created_at,
-    updated_at
-FROM users
+SELECT * FROM users
 WHERE
     deleted_at IS NULL
     AND (

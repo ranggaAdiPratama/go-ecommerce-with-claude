@@ -22,14 +22,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT
-    id,
-    name,
-    username,
-    email,
-    role,
-    created_at,
-    updated_at
+SELECT id, name, username, email, password, role, created_at, updated_at, deleted_at
 FROM users
 WHERE
     email = $1
@@ -37,40 +30,25 @@ WHERE
 LIMIT 1
 `
 
-type GetUserByEmailRow struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Role      string    `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
-	var i GetUserByEmailRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Username,
 		&i.Email,
+		&i.Password,
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT
-    id,
-    name,
-    username,
-    email,
-    role,
-    created_at,
-    updated_at
+SELECT id, name, username, email, password, role, created_at, updated_at, deleted_at
 FROM users
 WHERE
     id = $1
@@ -78,40 +56,25 @@ WHERE
 LIMIT 1
 `
 
-type GetUserByIdRow struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Role      string    `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error) {
+func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUserById, id)
-	var i GetUserByIdRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Username,
 		&i.Email,
+		&i.Password,
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT
-    id,
-    name,
-    username,
-    email,
-    role,
-    created_at,
-    updated_at
+SELECT id, name, username, email, password, role, created_at, updated_at, deleted_at
 FROM users
 WHERE
     username = $1
@@ -119,27 +82,19 @@ WHERE
 LIMIT 1
 `
 
-type GetUserByUsernameRow struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Role      string    `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-func (q *Queries) GetUserByUsername(ctx context.Context, username string) (GetUserByUsernameRow, error) {
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUserByUsername, username)
-	var i GetUserByUsernameRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Username,
 		&i.Email,
+		&i.Password,
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
@@ -278,15 +233,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateU
 }
 
 const userList = `-- name: UserList :many
-SELECT
-    id,
-    name,
-    username,
-    email,
-    role,
-    created_at,
-    updated_at
-FROM users
+SELECT id, name, username, email, password, role, created_at, updated_at, deleted_at FROM users
 WHERE
     deleted_at IS NULL
     AND (
@@ -316,17 +263,7 @@ type UserListParams struct {
 	Till      int32  `json:"till"`
 }
 
-type UserListRow struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Role      string    `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-func (q *Queries) UserList(ctx context.Context, arg UserListParams) ([]UserListRow, error) {
+func (q *Queries) UserList(ctx context.Context, arg UserListParams) ([]User, error) {
 	rows, err := q.db.QueryContext(ctx, userList,
 		arg.Role,
 		arg.Sort,
@@ -337,17 +274,19 @@ func (q *Queries) UserList(ctx context.Context, arg UserListParams) ([]UserListR
 		return nil, err
 	}
 	defer rows.Close()
-	items := []UserListRow{}
+	items := []User{}
 	for rows.Next() {
-		var i UserListRow
+		var i User
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.Username,
 			&i.Email,
+			&i.Password,
 			&i.Role,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
