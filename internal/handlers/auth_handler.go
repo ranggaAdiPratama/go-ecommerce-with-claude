@@ -64,15 +64,24 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	if err != nil {
 		statusCode := http.StatusInternalServerError
+		message := "Error :("
 
-		if err.Error() == "invalid credentials" || err.Error() == "account has been deactivated" {
+		if err.Error() == "refresh token has been revoked" {
 			statusCode = http.StatusUnauthorized
+
+			message = "Refresh token has been revoked. Please login again."
+		}
+
+		if err.Error() == "refresh token has been revoked" {
+			statusCode = http.StatusUnauthorized
+
+			message = "Refresh token has expired. Please login again."
 		}
 
 		c.JSON(statusCode, responses.Response{
 			MetaData: responses.MetaDataResponse{
 				Code:    statusCode,
-				Message: "Invalid input. Please check your data.",
+				Message: message,
 			},
 		})
 
@@ -83,6 +92,99 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		MetaData: responses.MetaDataResponse{
 			Code:    http.StatusOK,
 			Message: "Login success",
+		},
+		Data: data,
+	})
+}
+
+func (h *AuthHandler) Logout(c *gin.Context) {
+	userPayload, exists := c.Get("user")
+
+	if !exists {
+		c.JSON(http.StatusUnauthorized, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusUnauthorized,
+				Message: "Unauthorized",
+			},
+		})
+
+		return
+	}
+
+	err := h.service.Logout(c, userPayload.(*utils.TokenPayload).ID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusInternalServerError,
+				Message: "Error :(",
+			},
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.Response{
+		MetaData: responses.MetaDataResponse{
+			Code:    http.StatusOK,
+			Message: "Logout success",
+		},
+	})
+}
+
+func (h *AuthHandler) RefreshToken(c *gin.Context) {
+	var request requests.RefreshTokenRequest
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		var ve validator.ValidationErrors
+
+		if errors.As(err, &ve) {
+			out := make([]string, len(ve))
+
+			for i, fe := range ve {
+				out[i] = utils.HumanizeError(fe)
+			}
+
+			c.JSON(http.StatusBadRequest, responses.Response{
+				MetaData: responses.MetaDataResponse{
+					Code:    http.StatusBadRequest,
+					Message: "Invalid input. Please check your data.",
+				},
+				Data: out,
+			})
+
+			return
+		}
+
+		c.JSON(http.StatusBadRequest, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusBadRequest,
+				Message: "Invalid input. Please check your data.",
+			},
+		})
+
+		return
+	}
+
+	data, err := h.service.RefreshToken(c, request)
+
+	if err != nil {
+		fmt.Println(err)
+
+		c.JSON(http.StatusInternalServerError, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusInternalServerError,
+				Message: "Error :(",
+			},
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.Response{
+		MetaData: responses.MetaDataResponse{
+			Code:    http.StatusOK,
+			Message: "Refresh Token success",
 		},
 		Data: data,
 	})

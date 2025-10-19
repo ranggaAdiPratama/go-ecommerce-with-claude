@@ -116,6 +116,10 @@ func (maker *PasetoMaker) VerifyToken(tokenString string) (*TokenPayload, error)
 		return nil, fmt.Errorf("error getting expiration from token: %w", err)
 	}
 
+	if time.Now().After(expiredAt) {
+		return nil, fmt.Errorf("token has expired")
+	}
+
 	payload := &TokenPayload{
 		ID:        userID,
 		Username:  username,

@@ -81,6 +81,107 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let responseData = pm.response.json();\r",
+									"\r",
+									"if(pm.response.code == 200) {\r",
+									"pm.environment.set(\"authToken\", responseData.data.token);\r",
+									"pm.environment.set(\"refreshToken\", responseData.data.refresh_token);\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\":\"v4.local.7rsgqon4e0YcMjdBnTT3zDKbcXM16pG8QfFhXHFvJR4AAI1IOlGR-TKNXb2lP5QSODRA5qGWd8x6NHeFqoFhVQeKyjVvWJXQdojYdYgPLre2XfF7FqwrWS28d7SYW9jTpUAjbySw4b_bh936ov0CMNIoFOz1I9VNDcGEaB7z-nEfDtSDTtc1mbsBmn79jIupQ1JxAznE4uTLF0mzJDP9jmRsS0D3fKDUQdP_6_R1571f6P__Tin1131u5wVeUNnbojwMBEoLdXrq57Nz66blJSmbukNx04KkOdqAVU6kC4qv1deHbqySP0Rw-j_ajNIbZJ5E-9OT31lQwgb2AVC2Jb43HhXO9M8PrNh4Ea5boyFpD6mQRwSKUNFqEg\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}auth/refresh-token",
+							"host": [
+								"{{url}}auth"
+							],
+							"path": [
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let responseData = pm.response.json();\r",
+									"\r",
+									"if(pm.response.code == 200) {\r",
+									"pm.environment.set(\"authToken\",\"\");\r",
+									"pm.environment.set(\"refreshToken\", \"\");\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"Username\":\"rangga\",\r\n    \"password\":\"12juli1996\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}auth/logout",
+							"host": [
+								"{{url}}auth"
+							],
+							"path": [
+								"logout"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},

@@ -5,6 +5,7 @@ import (
 	"ranggaAdiPratama/go-with-claude/internal/config"
 	"ranggaAdiPratama/go-with-claude/internal/database"
 	"ranggaAdiPratama/go-with-claude/internal/handlers"
+	"ranggaAdiPratama/go-with-claude/internal/middleware"
 	"ranggaAdiPratama/go-with-claude/internal/responses"
 	"ranggaAdiPratama/go-with-claude/internal/service"
 	"ranggaAdiPratama/go-with-claude/internal/utils"
@@ -22,10 +23,12 @@ func Index(r *gin.Engine, s *database.Store, p *utils.PasetoMaker, c *config.Con
 	r.GET("/", IndexRoute)
 	r.GET("/health", HealthRoute)
 
-	users := r.Group("/api/users")
 	auth := r.Group("/api/auth")
+	users := r.Group("/api/users")
 
 	auth.POST("/login", authHandler.Login)
+	auth.POST("/logout", middleware.AuthMiddleware(p), authHandler.Logout)
+	auth.POST("/refresh-token", authHandler.RefreshToken)
 	auth.POST("/register", authHandler.Register)
 
 	users.GET("", userHandler.Index)
