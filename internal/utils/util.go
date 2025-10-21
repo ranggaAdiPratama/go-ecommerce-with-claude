@@ -1,18 +1,15 @@
 package utils
 
 import (
-	"os"
+	"regexp"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 )
 
-func GetEnv(key, fallback string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-
-	return fallback
+func EscapeRegex(s string) string {
+	re := regexp.MustCompile(`([\\.^$|(){}\[\]*+?])`)
+	return re.ReplaceAllString(s, `\\$1`)
 }
 
 func HumanizeError(fe validator.FieldError) string {

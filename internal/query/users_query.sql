@@ -29,6 +29,13 @@ WHERE
     AND (
         NULLIF(@role::text, '') IS NULL
         OR role = @role::text
+    ) AND (
+        NULLIF(@search::text, '') IS NULL
+        OR (
+            name ~* @search::text
+            OR username ~* @search::text
+            OR email ~* @search::text
+        )
     )
 ORDER BY
     CASE
@@ -42,8 +49,33 @@ ORDER BY
     END ASC,
     CASE
         WHEN @sort::text = 'created_at' AND @sort_order::text = 'desc' THEN created_at
-    END DESC
-LIMIT COALESCE(@till::int, 15);
+    END DESC,
+    CASE
+        WHEN @sort::text = 'created_at' THEN created_at
+    END ASC,
+    CASE
+        WHEN @sort::text = 'name' THEN created_at
+    END ASC,
+    name DESC
+LIMIT COALESCE(@till::int, 15)
+OFFSET COALESCE(@page::int, 0);
+
+-- name: UserListTotal :one
+SELECT COUNT(*) AS total
+FROM users
+WHERE
+    deleted_at IS NULL
+    AND (
+        NULLIF(@role::text, '') IS NULL
+        OR role = @role::text
+    ) AND (
+        NULLIF(@search::text, '') IS NULL
+        OR (
+            name ~* @search::text
+            OR username ~* @search::text
+            OR email ~* @search::text
+        )
+    );
 
 -- name: StoreUser :one
 INSERT INTO

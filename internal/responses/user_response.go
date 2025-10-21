@@ -2,6 +2,11 @@ package responses
 
 import "github.com/google/uuid"
 
+type UserListResponse struct {
+	Data       []UserResponse     `json:"data"`
+	Pagination PaginationResponse `json:"pagination"`
+}
+
 type UserResponse struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`

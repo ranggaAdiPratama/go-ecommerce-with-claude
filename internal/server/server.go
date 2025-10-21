@@ -12,10 +12,11 @@ import (
 )
 
 type Server struct {
-	config      *config.Config
-	router      *gin.Engine
-	store       *database.Store
-	pasetoMaker *utils.PasetoMaker
+	config            *config.Config
+	router            *gin.Engine
+	store             *database.Store
+	pasetoMaker       *utils.PasetoMaker
+	cloudinaryService *utils.CloudinaryService
 }
 
 func New(db *sql.DB, cfg *config.Config) *Server {
@@ -30,14 +31,21 @@ func New(db *sql.DB, cfg *config.Config) *Server {
 		log.Fatal("Cannot create PASETO maker:", err)
 	}
 
-	s := &Server{
-		config:      cfg,
-		router:      router,
-		store:       store,
-		pasetoMaker: pasetoMaker,
+	cloudinaryService, err := utils.NewCloudinaryService(cfg.CloudinaryName, cfg.CloudinaryAPIKey, cfg.CloudinaryAPISecret, cfg.CloudinaryFolder)
+
+	if err != nil {
+		log.Fatal("Cannot set Cloudinary Service:", err)
 	}
 
-	routes.Index(router, store, pasetoMaker, cfg)
+	s := &Server{
+		config:            cfg,
+		router:            router,
+		store:             store,
+		pasetoMaker:       pasetoMaker,
+		cloudinaryService: cloudinaryService,
+	}
+
+	routes.Index(router, store, pasetoMaker, cfg, cloudinaryService)
 
 	return s
 }

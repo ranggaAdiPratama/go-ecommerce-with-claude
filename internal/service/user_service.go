@@ -21,20 +21,32 @@ func NewUserService(store *database.Store) *UserService {
 	}
 }
 
-func (s *UserService) Index(ctx context.Context, params database.UserListParams) ([]responses.UserResponse, error) {
-	fmt.Println(params)
+func (s *UserService) Index(ctx context.Context, params database.UserListParams) (responses.UserListResponse, error) {
+	var resp responses.UserListResponse
+
 	users, err := s.store.UserList(ctx, params)
 
 	if err != nil {
-		return nil, err
+		return resp, err
 	}
 
-	resp := make([]responses.UserResponse, len(users))
+	countParam := database.UserListTotalParams{
+		Role:   params.Role,
+		Search: params.Search,
+	}
 
-	fmt.Println(users)
+	total, err := s.store.UserListTotal(ctx, countParam)
+
+	if err != nil {
+		fmt.Println(err)
+
+		return resp, err
+	}
+
+	userData := make([]responses.UserResponse, len(users))
 
 	for i, user := range users {
-		resp[i] = responses.UserResponse{
+		userData[i] = responses.UserResponse{
 			ID:        user.ID,
 			Name:      user.Name,
 			Username:  user.Username,
@@ -44,6 +56,19 @@ func (s *UserService) Index(ctx context.Context, params database.UserListParams)
 			UpdatedAt: user.UpdatedAt.Format("2006-01-02T15:04:07Z"),
 		}
 	}
+
+	totalPages := (total + int64(params.Till) - 1) / int64(params.Till)
+
+	currentPage := int32((params.Page / params.Till) + 1)
+
+	resp = responses.UserListResponse{
+		Data: userData,
+		Pagination: responses.PaginationResponse{
+			Total:       int32(total),
+			CurrentPage: currentPage,
+			Pages:       int32(totalPages),
+			Limit:       params.Till,
+		}}
 
 	return resp, nil
 }

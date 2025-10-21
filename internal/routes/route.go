@@ -13,11 +13,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Index(r *gin.Engine, s *database.Store, p *utils.PasetoMaker, c *config.Config) {
+func Index(r *gin.Engine, s *database.Store, p *utils.PasetoMaker, c *config.Config, cl *utils.CloudinaryService) {
 	authService := service.NewAuthService(s, p, c)
+	shopService := service.NewShopService(s, cl)
 	userService := service.NewUserService(s)
 
 	authHandler := handlers.NewAuthHandler(authService, userService)
+	shopHandler := handlers.NewShopHandler(shopService)
 	userHandler := handlers.NewUserHandler(userService)
 
 	r.GET("/", IndexRoute)
@@ -25,11 +27,14 @@ func Index(r *gin.Engine, s *database.Store, p *utils.PasetoMaker, c *config.Con
 
 	auth := r.Group("/api/auth")
 	users := r.Group("/api/users")
+	shop := r.Group("/api/shops").Use(middleware.AuthMiddleware(p))
 
 	auth.POST("/login", authHandler.Login)
 	auth.POST("/logout", middleware.AuthMiddleware(p), authHandler.Logout)
 	auth.POST("/refresh-token", authHandler.RefreshToken)
 	auth.POST("/register", authHandler.Register)
+
+	shop.POST("", shopHandler.Store)
 
 	users.GET("", userHandler.Index)
 	users.GET("/:id", userHandler.Show)

@@ -239,35 +239,54 @@ WHERE
     AND (
         NULLIF($1::text, '') IS NULL
         OR role = $1::text
+    ) AND (
+        NULLIF($2::text, '') IS NULL
+        OR (
+            name ~* $2::text
+            OR username ~* $2::text
+            OR email ~* $2::text
+        )
     )
 ORDER BY
     CASE
-        WHEN $2::text = 'name' AND $3::text = 'asc' THEN name
+        WHEN $3::text = 'name' AND $4::text = 'asc' THEN name
     END ASC,
     CASE
-        WHEN $2::text = 'name' AND $3::text = 'desc' THEN name
+        WHEN $3::text = 'name' AND $4::text = 'desc' THEN name
     END DESC,
     CASE
-        WHEN $2::text = 'created_at' AND $3::text = 'asc' THEN created_at
+        WHEN $3::text = 'created_at' AND $4::text = 'asc' THEN created_at
     END ASC,
     CASE
-        WHEN $2::text = 'created_at' AND $3::text = 'desc' THEN created_at
-    END DESC
-LIMIT COALESCE($4::int, 15)
+        WHEN $3::text = 'created_at' AND $4::text = 'desc' THEN created_at
+    END DESC,
+    CASE
+        WHEN $3::text = 'created_at' THEN created_at
+    END ASC,
+    CASE
+        WHEN $3::text = 'name' THEN created_at
+    END ASC,
+    name DESC
+LIMIT COALESCE($6::int, 15)
+OFFSET COALESCE($5::int, 0)
 `
 
 type UserListParams struct {
 	Role      string `json:"role"`
+	Search    string `json:"search"`
 	Sort      string `json:"sort"`
 	SortOrder string `json:"sort_order"`
+	Page      int32  `json:"page"`
 	Till      int32  `json:"till"`
 }
 
 func (q *Queries) UserList(ctx context.Context, arg UserListParams) ([]User, error) {
 	rows, err := q.db.QueryContext(ctx, userList,
 		arg.Role,
+		arg.Search,
 		arg.Sort,
 		arg.SortOrder,
+		arg.Page,
 		arg.Till,
 	)
 	if err != nil {
@@ -299,4 +318,34 @@ func (q *Queries) UserList(ctx context.Context, arg UserListParams) ([]User, err
 		return nil, err
 	}
 	return items, nil
+}
+
+const userListTotal = `-- name: UserListTotal :one
+SELECT COUNT(*) AS total
+FROM users
+WHERE
+    deleted_at IS NULL
+    AND (
+        NULLIF($1::text, '') IS NULL
+        OR role = $1::text
+    ) AND (
+        NULLIF($2::text, '') IS NULL
+        OR (
+            name ~* $2::text
+            OR username ~* $2::text
+            OR email ~* $2::text
+        )
+    )
+`
+
+type UserListTotalParams struct {
+	Role   string `json:"role"`
+	Search string `json:"search"`
+}
+
+func (q *Queries) UserListTotal(ctx context.Context, arg UserListTotalParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, userListTotal, arg.Role, arg.Search)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
 }

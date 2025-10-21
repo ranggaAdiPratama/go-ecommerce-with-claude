@@ -19,9 +19,7 @@ CREATE INDEX idx_users_username ON users (username);
 CREATE INDEX idx_users_created_at ON users (created_at);
 
 ALTER TABLE users
-ADD CONSTRAINT check_user_role CHECK (
-    role IN ('user', 'admin', 'seller')
-);
+ADD CONSTRAINT check_user_role CHECK (role IN ('user', 'admin'));
 
 INSERT INTO
     users (
@@ -56,7 +54,7 @@ VALUES (
         'mitsuha',
         'mitsuha@mail.com',
         '$2a$10$kQ4DeLpy9YV7a1v4W3hu8OaFnRKXqv7uSlTeOKZEHGfImVStyguqC',
-        'seller',
+        'user',
         NOw(),
         NOW()
     );

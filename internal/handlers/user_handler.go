@@ -30,7 +30,9 @@ func (h *UserHandler) Index(c *gin.Context) {
 	sort := c.DefaultQuery("sort", "name")
 	order := c.DefaultQuery("order", "asc")
 	limitString := c.DefaultQuery("limit", "15")
-	role := c.DefaultQuery("role", "")
+	pageString := c.DefaultQuery("page", "1")
+	role := c.DefaultQuery("role", "user")
+	search := c.DefaultQuery("search", "")
 
 	limit, err := strconv.ParseInt(limitString, 10, 32)
 
@@ -45,11 +47,30 @@ func (h *UserHandler) Index(c *gin.Context) {
 		return
 	}
 
+	page, err := strconv.ParseInt(pageString, 10, 32)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusInternalServerError,
+				Message: "Error converting string to int32",
+			},
+		})
+
+		return
+	}
+
+	if search != "" {
+		search = utils.EscapeRegex(search)
+	}
+
 	params := &database.UserListParams{
+		Page:      int32((page - 1) * limit),
+		Role:      role,
+		Search:    search,
 		Sort:      sort,
 		SortOrder: order,
 		Till:      int32(limit),
-		Role:      role,
 	}
 
 	users, err := h.service.Index(c.Request.Context(), *params)
