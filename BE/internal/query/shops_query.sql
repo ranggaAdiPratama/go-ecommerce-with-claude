@@ -59,6 +59,26 @@ ORDER BY
 LIMIT COALESCE(@till::int, 15)
 OFFSET COALESCE(@page::int, 0);
 
+-- name: shopListWithLimit :many
+SELECT * FROM shops
+WHERE
+    deleted_at IS NULL
+ORDER BY
+    CASE
+        WHEN @sort::text = 'name' AND @sort_order::text = 'asc' THEN name
+    END ASC,
+    CASE
+        WHEN @sort::text = 'name' AND @sort_order::text = 'desc' THEN name
+    END DESC,
+    CASE
+        WHEN @sort::text = 'created_at' AND @sort_order::text = 'asc' THEN created_at
+    END ASC,
+    CASE
+        WHEN @sort::text = 'created_at' AND @sort_order::text = 'desc' THEN created_at
+    END DESC,
+    created_at DESC
+LIMIT COALESCE(@till::int, 15);
+
 -- name: ShopListTotal :one
 SELECT COUNT(*) AS total
 FROM shops
@@ -108,6 +128,7 @@ WHERE
     user_id,
     name,
     logo,
+    rank,
     created_at,
     updated_at;
 

@@ -27,14 +27,15 @@ func Index(r *gin.Engine, s *database.Store, p *utils.PasetoMaker, c *config.Con
 
 	auth := r.Group("/api/auth")
 	users := r.Group("/api/users")
-	shop := r.Group("/api/shops").Use(middleware.AuthMiddleware(p))
+	myShop := r.Group("/api/my-shop").Use(middleware.AuthMiddleware(p))
 
 	auth.POST("/login", authHandler.Login)
 	auth.POST("/logout", middleware.AuthMiddleware(p), authHandler.Logout)
 	auth.POST("/refresh-token", authHandler.RefreshToken)
 	auth.POST("/register", authHandler.Register)
 
-	shop.POST("", shopHandler.Store)
+	myShop.POST("", shopHandler.Store)
+	myShop.PUT("", middleware.RequireRole("user"), shopHandler.UpdatePersonal)
 
 	users.GET("", userHandler.Index)
 	users.GET("/:id", userHandler.Show)

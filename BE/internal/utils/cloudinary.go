@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net/url"
 	"path/filepath"
 	"strings"
 	"time"
@@ -76,27 +77,46 @@ func (s *CloudinaryService) UploadImage(ctx context.Context, file multipart.File
 	return uploadResult.SecureURL, uploadResult.PublicID, nil
 }
 
-func ExtractPublicID(url string) string {
-	parts := strings.Split(url, "/upload/")
+func ExtractPublicID(urlStr string) string {
+	urlStr = strings.TrimSpace(urlStr)
+
+	if urlStr == "" {
+		fmt.Println("ExtractPublicID: Empty URL provided")
+		return ""
+	}
+
+	parts := strings.Split(urlStr, "/upload/")
 
 	if len(parts) != 2 {
+		fmt.Printf("ExtractPublicID: Invalid URL format: %s\n", urlStr)
 		return ""
 	}
 
-	pathParts := strings.Split(parts[1], "/")
+	afterUpload := parts[1]
+	pathParts := strings.Split(afterUpload, "/")
 
-	if len(pathParts) != 2 {
+	if len(pathParts) < 2 {
+		fmt.Printf("ExtractPublicID: Insufficient path segments: %s\n", urlStr)
 		return ""
 	}
 
-	publicID := strings.Join(pathParts[1:], "/")
-	publicID = strings.TrimSuffix(publicID, filepath.Ext(publicID))
+	publicIDWithExt := strings.Join(pathParts[1:], "/")
+
+	decodedPublicID, err := url.QueryUnescape(publicIDWithExt)
+	if err != nil {
+		fmt.Printf("ExtractPublicID: Error decoding URL: %v\n", err)
+		decodedPublicID = publicIDWithExt
+	}
+
+	publicID := strings.TrimSuffix(decodedPublicID, filepath.Ext(decodedPublicID))
+
+	fmt.Printf("ExtractPublicID: URL=%s -> PublicID=%s\n", urlStr, publicID)
 
 	return publicID
 }
 
 func ValidateImageFile(fileHeader *multipart.FileHeader) error {
-	const maxFileSize = 5 * 1024 * 1024
+	const maxFileSize = 1024 * 1024 // 1 mb aja, gratisan aing makena, cuk :(
 
 	if fileHeader.Size > maxFileSize {
 		return fmt.Errorf("file size exceeds the maximum limit of 5MB")

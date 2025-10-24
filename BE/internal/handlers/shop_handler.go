@@ -123,3 +123,103 @@ func (h *ShopHandler) Store(c *gin.Context) {
 		Data: data,
 	})
 }
+
+func (h *ShopHandler) UpdatePersonal(c *gin.Context) {
+	userPayload, exists := c.Get("user")
+
+	if !exists {
+		c.JSON(http.StatusUnauthorized, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusUnauthorized,
+				Message: "Unauthorized",
+			},
+		})
+
+		return
+	}
+
+	payload := userPayload.(*utils.TokenPayload)
+
+	var request requests.StoreShopRequest
+
+	if err := c.ShouldBind(&request); err != nil {
+		fmt.Println(err)
+
+		var ve validator.ValidationErrors
+
+		if errors.As(err, &ve) {
+			out := make([]string, len(ve))
+
+			for i, fe := range ve {
+				out[i] = utils.HumanizeError(fe)
+			}
+
+			c.JSON(http.StatusBadRequest, responses.Response{
+				MetaData: responses.MetaDataResponse{
+					Code:    http.StatusBadRequest,
+					Message: "Invalid input. Please check your data.",
+				},
+				Data: out,
+			})
+
+			return
+		}
+
+		c.JSON(http.StatusBadRequest, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusBadRequest,
+				Message: "Invalid input. Please check your data.",
+			},
+		})
+
+		return
+	}
+
+	var data responses.ShopResponseForUser
+
+	logoFile, logoHeader, err := c.Request.FormFile("logo")
+
+	if logoFile != nil {
+		defer logoFile.Close()
+	}
+
+	if err != nil {
+		data, err = h.service.UpdatePersonal(c.Request.Context(), payload.ID, request, nil, nil)
+	} else {
+		data, err = h.service.UpdatePersonal(c.Request.Context(), payload.ID, request, logoFile, logoHeader)
+	}
+
+	if err != nil {
+		fmt.Println(err)
+
+		statusCode := http.StatusInternalServerError
+		message := "Error :("
+
+		if err.Error() == "user already has a shop" {
+			statusCode = http.StatusForbidden
+
+			message = "You already have a shop"
+		} else if err.Error() == "shop name is already taken" {
+			statusCode = http.StatusForbidden
+
+			message = err.Error()
+		}
+
+		c.JSON(statusCode, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    statusCode,
+				Message: message,
+			},
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.Response{
+		MetaData: responses.MetaDataResponse{
+			Code:    http.StatusOK,
+			Message: "Shop successfully updated",
+		},
+		Data: data,
+	})
+}

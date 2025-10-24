@@ -10,7 +10,7 @@ serve:
 	go run ./cmd/api/main.go
 
 sqlc:
-	docker run --rm -v "/mnt/f/API/go/e_commerce:/src" -w /src sqlc/sqlc generate
+	docker run --rm -v "/mnt/f/API/go/e_commerce/BE:/src" -w /src sqlc/sqlc generate
 
 tidy:
 	go mod tidy
