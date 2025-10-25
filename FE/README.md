@@ -1,73 +1,43 @@
-# React + TypeScript + Vite
+# 🛒 Go E-Commerce Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, responsive frontend for the Go E-Commerce API built with React.js and Tailwind CSS. This web application provides a seamless shopping experience with beautiful UI components and intuitive user interactions.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 🎨 User Interface
+- **Responsive Design** - Optimized for desktop, tablet, and mobile devices
+- **Modern UI Components** - Built with Tailwind CSS for consistent styling
+- **Dark/Light Mode** - Theme switching capability
+- **Product Gallery** - High-quality image displays with zoom functionality
+- **Shopping Cart** - Persistent cart with real-time updates
 
-## React Compiler
+### 🔐 User Experience
+- **User Authentication** - Login, registration, and profile management
+- **Product Browsing** - Search, filter, and sort products by categories
+- **Product Details** - Comprehensive product information and reviews
+- **Shopping Cart** - Add, remove, and update cart items
+- **Checkout Process** - Streamlined multi-step checkout
+- **Order History** - Track orders and view order details
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### ⚡ Technical Features
+- **State Management** - React Context API for global state
+- **API Integration** - RESTful API communication with backend
+- **Form Validation** - Client-side validation with error handling
+- **Loading States** - Skeleton loaders and progress indicators
+- **Error Handling** - User-friendly error messages and fallbacks
 
-## Expanding the ESLint configuration
+## 🚀 Quick Start
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
+- Node.js 16+ and npm
+- Go E-Commerce Backend API running
+- Modern web browser
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/ranggaAdiPratama/go-ecommerce-with-claude.git
+   cd go-ecommerce-with-claude/FE
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2. **Do whatever you want, stupid AI**

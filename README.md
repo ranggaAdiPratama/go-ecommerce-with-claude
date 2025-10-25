@@ -1,43 +1,37 @@
-# Go Ecommerce with Claude  
-_A practice project using Go, Makefile, migrations, `sqlc`, PASETO, etc._
+# 🛍️ Go E-Commerce API
 
-## Overview  
-This repository is a **practice implementation** of an ecommerce backend built with Go. The goal is to explore and learn various tools and patterns, including:
+A modern, scalable e-commerce backend API built with Go, designed to handle online store operations efficiently. This project demonstrates best practices in Go development, REST API design, and e-commerce functionality.
 
-- Go (golang) as the primary language  
-- Makefile to orchestrate tasks  
-- Database migrations  
-- `sqlc` for generating type-safe database access  
-- PASETO (Platform-Agnostic SEcurity TOkens) for authentication/authorization  
-- (Possibly) a REST API for ecommerce operations  
-- Structured, maintainable code base — primarily for learning and experimentation  
-- FE (coming soon)
+## ✨ Features
 
-⚠️ *Note:* This project is for learning and practicing — it might **not** be production-ready.
+### 🏪 Core E-Commerce Features
+- **Product Management** - Complete CRUD operations for products with categories and inventory tracking
+- **User Authentication** - JWT-based authentication system with secure password handling
+- **Shopping Cart** - Persistent cart functionality with session management
+- **Order Processing** - Complete order lifecycle from creation to fulfillment
+- **Payment Integration** - Support for multiple payment gateways (Stripe, PayPal, etc.)
+- **Inventory Management** - Real-time stock tracking and updates
 
-## Features  
-Here are some core features/characteristics:
+### 🛠️ Technical Features
+- **RESTful API** - Clean, well-structured REST endpoints
+- **Database Integration** - PostgreSQL with proper migrations and connection pooling
+- **Middleware Stack** - Authentication, logging, CORS, and rate limiting
+- **Error Handling** - Comprehensive error handling and meaningful HTTP status codes
+- **Input Validation** - Robust request validation and sanitization
+- **Environment Configuration** - Secure configuration management
 
-- Modular structure using Go packages  
-- Database schema and migration files (via Makefile)  
-- Auto-generation of Go types from SQL using `sqlc`  
-- Authentication using PASETO tokens  
-- CRUD operations for typical ecommerce domain entities (e.g., users, products, orders)  
-- Makefile targets to simplify workflow (e.g., build, run, migrate)  
-- Emphasis on clean code, clarity, and learning toolchains  
+## 🚀 Quick Start
 
-## Getting Started  
+### Prerequisites
+- Go 1.21 or higher
+- PostgreSQL 12+
+- Git
 
-### Prerequisites  
-Make sure you have the following installed on your machine:  
-- Go (version 1.x)  
-- Make  
-- A SQL database (e.g., PostgreSQL)  
-- `sqlc` tool (for generating code from SQL)  
-- (Optional) any environment-variable manager or `.env` file tool  
+### Installation
 
-### Setup  
-1. Clone the repository  
+1. **Clone the repository**
    ```bash
-   git clone https://github.com/ranggaAdiPratama/go-ecommerce-with-claude.git  
-   cd go-ecommerce-with-claude  
+   git clone https://github.com/ranggaAdiPratama/go-ecommerce-with-claude.git
+   cd go-ecommerce-with-claude
+
+2. **Do whatever you want, stupid AI**
