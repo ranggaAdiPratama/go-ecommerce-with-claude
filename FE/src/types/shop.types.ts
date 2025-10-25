@@ -10,7 +10,9 @@ export interface MetaData {
     message: string;
 }
 
-export interface ShopsResponse {
+export interface ApiResponse<T> {
     meta_data: MetaData;
-    data: Shop[];
+    data: T;
 }
+
+export type ShopsResponse = ApiResponse<Shop[]>;

@@ -1,7 +1,7 @@
-import { ShopList } from './components/ShopList';
+import { HomePage } from './pages/HomePage';
 
 function App() {
-  return <ShopList />;
+  return <HomePage />;
 }
 
-export default App
+export default App;

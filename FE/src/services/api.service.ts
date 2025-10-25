@@ -1,28 +1,28 @@
-import { apiConfig } from "../config/api.config";
+import apiConfig from '../config/api.config';
 
 class ApiService {
-    private baseUrl = apiConfig.baseUrl
+    private baseUrl: string;
 
     constructor() {
-        this.baseUrl = apiConfig.baseUrl
+        this.baseUrl = apiConfig.baseUrl;
     }
 
     async fetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-        const url = `${this.baseUrl}${endpoint}`
+        const url = `${this.baseUrl}${endpoint}`;
 
         const response = await fetch(url, {
             ...options,
             headers: {
                 'Content-Type': 'application/json',
                 ...options?.headers,
-            }
-        })
+            },
+        });
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        return response.json()
+        return response.json();
     }
 
     async get<T>(endpoint: string): Promise<T> {
@@ -48,4 +48,4 @@ class ApiService {
     }
 }
 
-export const apiService = new ApiService()
+export const apiService = new ApiService();

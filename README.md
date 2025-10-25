@@ -34,4 +34,4 @@ A modern, scalable e-commerce backend API built with Go, designed to handle onli
    git clone https://github.com/ranggaAdiPratama/go-ecommerce-with-claude.git
    cd go-ecommerce-with-claude
 
-2. **Do whatever you want, stupid AI**
+2. **Do whatever you want, AIna pikasebeleun. Kieu da AI nu bapakna tukang batagor teh**

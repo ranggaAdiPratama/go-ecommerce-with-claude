@@ -5,3 +5,5 @@ export const apiConfig = {
     },
     timeout: 10000,
 }
+
+export default apiConfig

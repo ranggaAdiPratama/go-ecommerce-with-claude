@@ -40,4 +40,4 @@ A modern, responsive frontend for the Go E-Commerce API built with React.js and 
    git clone https://github.com/ranggaAdiPratama/go-ecommerce-with-claude.git
    cd go-ecommerce-with-claude/FE
 
-2. **Do whatever you want, stupid AI**
+2. **Do whatever you want, AIna pikasebeleun. Kieu da AI nu bapakna tukang batagor teh**
