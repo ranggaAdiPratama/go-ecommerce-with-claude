@@ -481,6 +481,26 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}shops?limit=4",
+							"host": [
+								"{{url}}shops"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}

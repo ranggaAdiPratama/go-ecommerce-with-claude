@@ -26,6 +26,80 @@ func NewShopService(store *database.Store, cloudinary *utils.CloudinaryService) 
 	}
 }
 
+func (s *ShopService) Index(ctx context.Context, params database.ShopListParams) (responses.ShopDisplayResponse, error) {
+	var resp responses.ShopDisplayResponse
+
+	shops, err := s.store.ShopList(ctx, params)
+
+	if err != nil {
+		fmt.Println(err)
+
+		return resp, err
+	}
+
+	countParam := database.ShopListTotalParams{
+		Rank:   params.Rank,
+		Search: params.Search,
+	}
+
+	total, err := s.store.ShopListTotal(ctx, countParam)
+
+	if err != nil {
+		fmt.Println(err)
+
+		return resp, err
+	}
+
+	data := make([]responses.ShopResponseShort, len(shops))
+
+	for i, shop := range shops {
+		data[i] = responses.ShopResponseShort{
+			ID:   shop.ID,
+			Name: shop.Name,
+			Logo: shop.Logo,
+			Rank: shop.Rank,
+		}
+	}
+
+	totalPages := (total + int64(params.Till) - 1) / int64(params.Till)
+
+	currentPage := int32((params.Page / params.Till) + 1)
+
+	resp = responses.ShopDisplayResponse{
+		Data: data,
+		Pagination: responses.PaginationResponse{
+			Total:       int32(total),
+			CurrentPage: currentPage,
+			Pages:       int32(totalPages),
+			Limit:       params.Till,
+		}}
+
+	return resp, nil
+}
+
+func (s *ShopService) IndexNoPagination(ctx context.Context, params database.ShopListParams) ([]responses.ShopResponseShort, error) {
+	shops, err := s.store.ShopList(ctx, params)
+
+	if err != nil {
+		fmt.Println(err)
+
+		return nil, err
+	}
+
+	shopData := make([]responses.ShopResponseShort, len(shops))
+
+	for i, shop := range shops {
+		shopData[i] = responses.ShopResponseShort{
+			ID:   shop.ID,
+			Name: shop.Name,
+			Logo: shop.Logo,
+			Rank: shop.Rank,
+		}
+	}
+
+	return shopData, nil
+}
+
 func (s *ShopService) Store(ctx context.Context, userID uuid.UUID, body requests.StoreShopRequest, logoFile multipart.File, logoHeader *multipart.FileHeader) (responses.ShopResponseForUser, error) {
 	var resp responses.ShopResponseForUser
 

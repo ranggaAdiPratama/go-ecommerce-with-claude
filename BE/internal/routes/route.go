@@ -10,6 +10,7 @@ import (
 	"ranggaAdiPratama/go-with-claude/internal/service"
 	"ranggaAdiPratama/go-with-claude/internal/utils"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,17 +23,22 @@ func Index(r *gin.Engine, s *database.Store, p *utils.PasetoMaker, c *config.Con
 	shopHandler := handlers.NewShopHandler(shopService)
 	userHandler := handlers.NewUserHandler(userService)
 
+	r.Use(cors.Default())
+
 	r.GET("/", IndexRoute)
 	r.GET("/health", HealthRoute)
 
 	auth := r.Group("/api/auth")
 	users := r.Group("/api/users")
+	shops := r.Group("/api/shops")
 	myShop := r.Group("/api/my-shop").Use(middleware.AuthMiddleware(p))
 
 	auth.POST("/login", authHandler.Login)
 	auth.POST("/logout", middleware.AuthMiddleware(p), authHandler.Logout)
 	auth.POST("/refresh-token", authHandler.RefreshToken)
 	auth.POST("/register", authHandler.Register)
+
+	shops.GET("", shopHandler.Index)
 
 	myShop.POST("", shopHandler.Store)
 	myShop.PUT("", middleware.RequireRole("user"), shopHandler.UpdatePersonal)

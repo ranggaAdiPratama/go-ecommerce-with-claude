@@ -121,6 +121,84 @@ func (q *Queries) GetShopByUserId(ctx context.Context, userID uuid.UUID) (Shop, 
 	return i, err
 }
 
+const shopList = `-- name: ShopList :many
+SELECT id, user_id, name, logo, rank, created_at, updated_at, deleted_at FROM shops
+WHERE
+    deleted_at IS NULL
+     AND (
+        NULLIF($1::text, '') IS NULL
+        OR rank = $1::text
+    )
+    AND (
+        NULLIF($2::text, '') IS NULL
+        OR name ~* $2::text
+    )
+ORDER BY
+    CASE
+        WHEN $3::text = 'name' AND $4::text = 'asc' THEN name
+    END ASC,
+    CASE
+        WHEN $3::text = 'name' AND $4::text = 'desc' THEN name
+    END DESC,
+    CASE
+        WHEN $3::text = 'created_at' AND $4::text = 'asc' THEN created_at
+    END ASC,
+    CASE
+        WHEN $3::text = 'created_at' AND $4::text = 'desc' THEN created_at
+    END DESC,
+    name DESC
+LIMIT COALESCE($6::int, 15)
+OFFSET COALESCE($5::int, 0)
+`
+
+type ShopListParams struct {
+	Rank      string `json:"rank"`
+	Search    string `json:"search"`
+	Sort      string `json:"sort"`
+	SortOrder string `json:"sort_order"`
+	Page      int32  `json:"page"`
+	Till      int32  `json:"till"`
+}
+
+func (q *Queries) ShopList(ctx context.Context, arg ShopListParams) ([]Shop, error) {
+	rows, err := q.db.QueryContext(ctx, shopList,
+		arg.Rank,
+		arg.Search,
+		arg.Sort,
+		arg.SortOrder,
+		arg.Page,
+		arg.Till,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Shop{}
+	for rows.Next() {
+		var i Shop
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Name,
+			&i.Logo,
+			&i.Rank,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const shopListTotal = `-- name: ShopListTotal :one
 SELECT COUNT(*) AS total
 FROM shops
@@ -255,141 +333,4 @@ func (q *Queries) UpdateShop(ctx context.Context, arg UpdateShopParams) (UpdateS
 		&i.UpdatedAt,
 	)
 	return i, err
-}
-
-const shopList = `-- name: shopList :many
-SELECT id, user_id, name, logo, rank, created_at, updated_at, deleted_at FROM shops
-WHERE
-    deleted_at IS NULL
-     AND (
-        NULLIF($1::text, '') IS NULL
-        OR rank = $1::text
-    )
-    AND (
-        NULLIF($2::text, '') IS NULL
-        OR name ~* $2::text
-    )
-ORDER BY
-    CASE
-        WHEN $3::text = 'name' AND $4::text = 'asc' THEN name
-    END ASC,
-    CASE
-        WHEN $3::text = 'name' AND $4::text = 'desc' THEN name
-    END DESC,
-    CASE
-        WHEN $3::text = 'created_at' AND $4::text = 'asc' THEN created_at
-    END ASC,
-    CASE
-        WHEN $3::text = 'created_at' AND $4::text = 'desc' THEN created_at
-    END DESC,
-    name DESC
-LIMIT COALESCE($6::int, 15)
-OFFSET COALESCE($5::int, 0)
-`
-
-type shopListParams struct {
-	Rank      string `json:"rank"`
-	Search    string `json:"search"`
-	Sort      string `json:"sort"`
-	SortOrder string `json:"sort_order"`
-	Page      int32  `json:"page"`
-	Till      int32  `json:"till"`
-}
-
-func (q *Queries) shopList(ctx context.Context, arg shopListParams) ([]Shop, error) {
-	rows, err := q.db.QueryContext(ctx, shopList,
-		arg.Rank,
-		arg.Search,
-		arg.Sort,
-		arg.SortOrder,
-		arg.Page,
-		arg.Till,
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Shop{}
-	for rows.Next() {
-		var i Shop
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.Name,
-			&i.Logo,
-			&i.Rank,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.DeletedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const shopListWithLimit = `-- name: shopListWithLimit :many
-SELECT id, user_id, name, logo, rank, created_at, updated_at, deleted_at FROM shops
-WHERE
-    deleted_at IS NULL
-ORDER BY
-    CASE
-        WHEN $1::text = 'name' AND $2::text = 'asc' THEN name
-    END ASC,
-    CASE
-        WHEN $1::text = 'name' AND $2::text = 'desc' THEN name
-    END DESC,
-    CASE
-        WHEN $1::text = 'created_at' AND $2::text = 'asc' THEN created_at
-    END ASC,
-    CASE
-        WHEN $1::text = 'created_at' AND $2::text = 'desc' THEN created_at
-    END DESC,
-    created_at DESC
-LIMIT COALESCE($3::int, 15)
-`
-
-type shopListWithLimitParams struct {
-	Sort      string `json:"sort"`
-	SortOrder string `json:"sort_order"`
-	Till      int32  `json:"till"`
-}
-
-func (q *Queries) shopListWithLimit(ctx context.Context, arg shopListWithLimitParams) ([]Shop, error) {
-	rows, err := q.db.QueryContext(ctx, shopListWithLimit, arg.Sort, arg.SortOrder, arg.Till)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Shop{}
-	for rows.Next() {
-		var i Shop
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.Name,
-			&i.Logo,
-			&i.Rank,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.DeletedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }

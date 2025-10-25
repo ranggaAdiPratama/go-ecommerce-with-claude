@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"ranggaAdiPratama/go-with-claude/internal/database"
 	"ranggaAdiPratama/go-with-claude/internal/requests"
 	"ranggaAdiPratama/go-with-claude/internal/responses"
 	"ranggaAdiPratama/go-with-claude/internal/service"
 	"ranggaAdiPratama/go-with-claude/internal/utils"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -21,6 +23,63 @@ func NewShopHandler(service *service.ShopService) *ShopHandler {
 	return &ShopHandler{
 		service: service,
 	}
+}
+
+func (h *ShopHandler) Index(c *gin.Context) {
+	sort := c.DefaultQuery("sort", "created_at")
+	order := c.DefaultQuery("order", "desc")
+	limitString := c.DefaultQuery("limit", "15")
+	rank := ""
+	search := ""
+
+	limit, err := strconv.ParseInt(limitString, 10, 32)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusInternalServerError,
+				Message: "Error converting string to int32",
+			},
+		})
+
+		return
+	}
+
+	if search != "" {
+		search = utils.EscapeRegex(search)
+	}
+
+	params := &database.ShopListParams{
+		Page:      0,
+		Rank:      rank,
+		Search:    search,
+		Sort:      sort,
+		SortOrder: order,
+		Till:      int32(limit),
+	}
+
+	shops, err := h.service.IndexNoPagination(c.Request.Context(), *params)
+
+	if err != nil {
+		fmt.Println(err)
+
+		c.JSON(http.StatusInternalServerError, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusInternalServerError,
+				Message: "Failed to fetch users",
+			},
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.Response{
+		MetaData: responses.MetaDataResponse{
+			Code:    http.StatusOK,
+			Message: "Shops Retrieved Successfully",
+		},
+		Data: shops,
+	})
 }
 
 func (h *ShopHandler) Store(c *gin.Context) {
