@@ -64,7 +64,8 @@ func (s *CloudinaryService) UploadImage(ctx context.Context, file multipart.File
 		PublicID:       uniqueFileName,
 		Folder:         s.folder,
 		ResourceType:   "image",
-		Transformation: "q_auto,f_auto",
+		Transformation: "q_auto",
+		Format:         strings.TrimPrefix(ext, "."),
 	})
 
 	if err != nil {
