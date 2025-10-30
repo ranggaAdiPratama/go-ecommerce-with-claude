@@ -1,3 +1,5 @@
+import type { ApiResponse } from "./api.types";
+
 export interface Shop {
     id: string;
     name: string;
@@ -5,14 +7,6 @@ export interface Shop {
     rank: 'bronze' | 'silver' | 'gold' | 'platinum';
 }
 
-export interface MetaData {
-    code: number;
-    message: string;
-}
 
-export interface ApiResponse<T> {
-    meta_data: MetaData;
-    data: T;
-}
 
 export type ShopsResponse = ApiResponse<Shop[]>;
