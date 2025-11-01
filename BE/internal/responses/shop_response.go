@@ -14,6 +14,7 @@ type ShopResponseForUser struct {
 	Name      string    `json:"name"`
 	Logo      string    `json:"logo"`
 	Rank      string    `json:"rank"`
+	Slug      string    `json:"slug"`
 	CreatedAt string    `json:"created_at"`
 	UpdatedAt string    `json:"updated_at"`
 }
@@ -22,5 +23,6 @@ type ShopResponseShort struct {
 	ID   uuid.UUID `json:"id"`
 	Name string    `json:"name"`
 	Logo string    `json:"logo"`
+	Slug string    `json:"slug"`
 	Rank string    `json:"rank"`
 }

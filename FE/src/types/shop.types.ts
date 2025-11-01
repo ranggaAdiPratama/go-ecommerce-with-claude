@@ -4,6 +4,7 @@ export interface Shop {
     id: string;
     name: string;
     logo: string;
+    slug: string;
     rank: 'bronze' | 'silver' | 'gold' | 'platinum';
 }
 

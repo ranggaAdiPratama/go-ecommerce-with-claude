@@ -250,20 +250,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	_, err = h.user.Store(c, *body)
 
 	if err != nil {
-		if errors.Is(err, errors.New("e-mail already taken")) {
-			c.JSON(http.StatusBadGateway, responses.Response{
+		if err.Error() == "e-mail already taken" || err.Error() == "username already taken" {
+			c.JSON(http.StatusBadRequest, responses.Response{
 				MetaData: responses.MetaDataResponse{
-					Code:    http.StatusBadGateway,
-					Message: "e-mail already taken",
-				},
-			})
-
-			return
-		} else if errors.Is(err, errors.New("username already taken")) {
-			c.JSON(http.StatusBadGateway, responses.Response{
-				MetaData: responses.MetaDataResponse{
-					Code:    http.StatusBadGateway,
-					Message: "username already taken",
+					Code:    http.StatusBadRequest,
+					Message: err.Error(),
 				},
 			})
 

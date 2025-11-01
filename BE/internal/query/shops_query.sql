@@ -22,6 +22,14 @@ WHERE
     AND deleted_at IS NULL
 LIMIT 1;
 
+-- name: GetShopBySlug :one
+SELECT *
+FROM shops
+WHERE
+    slug = $1
+    AND deleted_at IS NULL
+LIMIT 1;
+
 -- name: GetShopByUserId :one
 SELECT *
 FROM shops
@@ -79,14 +87,16 @@ INSERT INTO
         user_id,
         name,
         logo,
+        slug,
         created_at,
         updated_at
     )
-VALUES ($1, $2, $3, NOw(), NOW()) RETURNING id,
+VALUES ($1, $2, $3, $4, NOw(), NOW()) RETURNING id,
     user_id,
     name,
     logo,
     rank,
+    slug,
     created_at,
     updated_at;
 
@@ -102,6 +112,10 @@ SET
         NULLIF(@rank::text, ''),
         rank
     ),
+    slug = COALESCE(
+        NULLIF(@slug::text, ''),
+        slug
+    ),
     updated_at = NOW()
 WHERE
     id = @id RETURNING id,
@@ -109,6 +123,7 @@ WHERE
     name,
     logo,
     rank,
+    slug,
     created_at,
     updated_at;
 

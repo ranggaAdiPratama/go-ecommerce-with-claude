@@ -58,6 +58,7 @@ func (s *ShopService) Index(ctx context.Context, params database.ShopListParams)
 			Name: shop.Name,
 			Logo: shop.Logo,
 			Rank: shop.Rank,
+			Slug: shop.Slug,
 		}
 	}
 
@@ -94,6 +95,7 @@ func (s *ShopService) IndexNoPagination(ctx context.Context, params database.Sho
 			Name: shop.Name,
 			Logo: shop.Logo,
 			Rank: shop.Rank,
+			Slug: shop.Slug,
 		}
 	}
 
@@ -166,6 +168,7 @@ func (s *ShopService) Store(ctx context.Context, userID uuid.UUID, body requests
 		UserID: userID,
 		Name:   body.Name,
 		Logo:   logoURL,
+		Slug:   utils.GenerateSlug(body.Name),
 	})
 
 	if err != nil {
@@ -181,6 +184,7 @@ func (s *ShopService) Store(ctx context.Context, userID uuid.UUID, body requests
 		Name:      shop.Name,
 		Logo:      shop.Logo,
 		Rank:      shop.Rank,
+		Slug:      shop.Slug,
 		CreatedAt: shop.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt: shop.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
@@ -242,6 +246,7 @@ func (s *ShopService) UpdatePersonal(ctx context.Context, userID uuid.UUID, req 
 		ID:   id,
 		Name: req.Name,
 		Logo: oldData.Logo,
+		Slug: utils.GenerateSlug(req.Name),
 	}
 
 	if logoFile != nil && logoHeader != nil {
@@ -278,6 +283,7 @@ func (s *ShopService) UpdatePersonal(ctx context.Context, userID uuid.UUID, req 
 		Name:      shop.Name,
 		Logo:      shop.Logo,
 		Rank:      shop.Rank,
+		Slug:      shop.Slug,
 		CreatedAt: shop.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt: shop.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}

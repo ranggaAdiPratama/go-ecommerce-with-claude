@@ -4,6 +4,7 @@ CREATE TABLE shops (
     name VARCHAR(255) NOT NULL,
     logo VARCHAR(255) NOT NULL,
     rank VARCHAR(255) NOT NULL DEFAULT 'bronze',
+    slug VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMP NULL
@@ -32,6 +33,7 @@ INSERT INTO
         user_id,
         name,
         logo,
+        slug,
         created_at,
         updated_at
     )
@@ -44,6 +46,7 @@ VALUES (
         ),
         'Ranmitsu Shop',
         'https://res.cloudinary.com/duwqriyoo/image/upload/v1761057333/go-e-commerce/1761057331_dreamina-2025-10-21-9882-a%20simple%20logo%20for%20a%20shop%20named%20Ranmitsu.....jpeg.jpg',
+        'ranmitsu-shop',
         NOw(),
         NOW()
     ),
@@ -56,6 +59,7 @@ VALUES (
         ),
         'Sumber Fortune',
         'https://res.cloudinary.com/duwqriyoo/image/upload/v1761277637/go-e-commerce/1761277638_sumber%20fortune.jpeg.jpg',
+        'sumber-fortune',
         NOw(),
         NOW()
     );
