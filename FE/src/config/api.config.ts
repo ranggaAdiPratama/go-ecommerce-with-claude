@@ -3,6 +3,7 @@ export const apiConfig = {
     endpoints: {
         register: '/api/auth/register',
         settings: '/api/settings',
+        categories: '/api/categories',
         shops: '/api/shops',
     },
     timeout: 10000,

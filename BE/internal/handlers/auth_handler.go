@@ -254,7 +254,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, responses.Response{
 				MetaData: responses.MetaDataResponse{
 					Code:    http.StatusBadRequest,
-					Message: err.Error(),
+					Message: utils.CapitalizeFirst(err.Error()),
 				},
 			})
 
@@ -266,7 +266,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, responses.Response{
 			MetaData: responses.MetaDataResponse{
 				Code:    http.StatusInternalServerError,
-				Message: "Failed in storing user",
+				Message: "Failed in database transaction",
 			},
 		})
 

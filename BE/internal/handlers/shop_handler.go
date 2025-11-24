@@ -66,7 +66,7 @@ func (h *ShopHandler) Index(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, responses.Response{
 			MetaData: responses.MetaDataResponse{
 				Code:    http.StatusInternalServerError,
-				Message: "Failed to fetch users",
+				Message: "Failed to fetch shops",
 			},
 		})
 

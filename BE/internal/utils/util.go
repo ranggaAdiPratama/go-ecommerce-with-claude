@@ -2,10 +2,18 @@ package utils
 
 import (
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 )
+
+func CapitalizeFirst(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
+}
 
 func EscapeRegex(s string) string {
 	re := regexp.MustCompile(`([\\.^$|(){}\[\]*+?])`)
@@ -23,6 +31,14 @@ func HumanizeError(fe validator.FieldError) string {
 	default:
 		return fe.Field() + " is invalid"
 	}
+}
+
+func Paginator(total int64, limit int32, page int32) (int64, int32) {
+	totalPages := (total + int64(limit) - 1) / int64(limit)
+
+	currentPage := int32((page / limit) + 1)
+
+	return totalPages, currentPage
 }
 
 func ParseDuration(s string) time.Duration {
