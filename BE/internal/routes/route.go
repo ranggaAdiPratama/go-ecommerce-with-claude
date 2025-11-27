@@ -9,7 +9,6 @@ import (
 	"ranggaAdiPratama/go-with-claude/internal/service"
 	"ranggaAdiPratama/go-with-claude/internal/utils"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,8 +24,6 @@ func Index(r *gin.Engine, s *database.Store, p *utils.PasetoMaker, c *config.Con
 	settingHandler := handlers.NewSettingHandler(settingService)
 	shopHandler := handlers.NewShopHandler(shopService)
 	userHandler := handlers.NewUserHandler(userService)
-
-	r.Use(cors.Default())
 
 	r.GET("/", IndexRoute)
 	r.GET("/health", HealthRoute)

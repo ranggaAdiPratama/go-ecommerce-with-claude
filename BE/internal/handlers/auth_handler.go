@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -62,9 +63,20 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	data, err := h.service.Login(c, request)
 
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusInternalServerError, responses.Response{
+			MetaData: responses.MetaDataResponse{
+				Code:    http.StatusInternalServerError,
+				Message: "Username not found",
+			},
+		})
+
+		return
+	}
+
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		message := "Error :("
+		message := "Invalid Password"
 
 		if err.Error() == "refresh token has been revoked" {
 			statusCode = http.StatusUnauthorized

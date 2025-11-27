@@ -196,6 +196,7 @@ export const RegisterPage = () => {
                             </div>
                             <p className="text-xs text-gray-500 mt-1">At least 8 characters</p>
                         </div>
+                        <br></br>
                         <button
                             type="submit"
                             disabled={loadingState}
@@ -219,8 +220,8 @@ export const RegisterPage = () => {
                 </form>
                 <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600">
-                        Already have an account?{' '}
-                        <a href="/login" className="text-indigo-600 hover:text-indigo-700 font-semibold">
+                        Already have an account?
+                        <a href="/auth/login" className="text-indigo-600 hover:text-indigo-700 font-semibold">
                             Sign In
                         </a>
                     </p>

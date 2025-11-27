@@ -25,10 +25,11 @@ class ApiService {
         return this.fetch<T>(endpoint, { method: 'GET' });
     }
 
-    async post<T>(endpoint: string, data: unknown): Promise<T> {
+    async post<T>(endpoint: string, data: unknown, options?: RequestInit): Promise<T> {
         return this.fetch<T>(endpoint, {
             method: 'POST',
             body: JSON.stringify(data),
+            ...options
         });
     }
 
