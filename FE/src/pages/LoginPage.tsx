@@ -48,15 +48,7 @@ export const LoginPage = () => {
             const data = await authService.login(formData);
 
             if (typeof data === 'object' && data !== null && 'user' in data) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Login Successful!',
-                    text: `Welcome back, ${data.user.name}!`,
-                    confirmButtonColor: '#4F46E5',
-                    timer: 2000,
-                }).then(() => {
-                    navigate('/dashboard');
-                });
+                navigate('/dashboard');
             }
         } catch (error) {
             Swal.fire({
